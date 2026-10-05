@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block title %}Past Reports{% endblock %}
+{% block content %}<div class="head"><div><h1>Past Reports</h1><p>Your previous daily reports.</p></div></div>
+<div class="card scroll"><table class="tbl stack-m"><thead><tr><th>Date</th><th>Login</th><th>Logout</th><th>Hours</th><th></th></tr></thead><tbody>
+{% for r in reports %}<tr><td data-l="Date"><b>{{ r.workday.date|date:"D, j M Y" }}</b></td><td data-l="Login">{{ r.workday.started_at|date:"g:i A" }}</td>
+<td data-l="Logout">{{ r.workday.ended_at|date:"g:i A" }}</td><td data-l="Hours">{{ r.workday.hours }}</td><td class="right"><a href="{% url 'report_detail' r.pk %}">View Report</a></td></tr>
+{% empty %}<tr><td colspan="5" class="empty">No reports yet.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}

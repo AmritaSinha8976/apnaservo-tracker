@@ -1,0 +1,29 @@
+{% extends "base.html" %}{% block title %}Notifications{% endblock %}
+{% block content %}
+<div class="head"><div><h1>Notifications</h1><p>All your alerts in one place</p></div></div>
+
+<div class="stack">
+{% for n in notifs %}
+<div class="card" style="display:flex;gap:14px;align-items:flex-start;{% if not n.is_read %}border-left:3px solid #ef4444{% endif %}">
+  <div style="flex:1">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
+      {% if n.kind == 'DEADLINE' %}
+        <span class="badge b-bad">⏰ Deadline Passed</span>
+      {% else %}
+        <span class="badge b-rose">📋 New Task Assigned</span>
+      {% endif %}
+      <span class="muted small">{{ n.created_at|date:"j M Y, g:i A" }}</span>
+    </div>
+    <div>{{ n.message }}</div>
+    {% if n.work_item %}
+    <div style="margin-top:6px">
+      <span class="muted small">Task status: <b>{{ n.work_item.get_status_display }}</b></span>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% empty %}
+<div class="card"><p class="muted">You're all caught up — no notifications.</p></div>
+{% endfor %}
+</div>
+{% endblock %}

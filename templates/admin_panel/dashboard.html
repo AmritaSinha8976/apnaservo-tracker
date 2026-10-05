@@ -1,0 +1,83 @@
+{% extends "base.html" %}{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="head"><div><h1>Team overview</h1><p>{{ today|date:"l, j F Y" }}</p></div><a class="btn" href="{% url 'member_new' %}">+ Add Member</a></div>
+
+{% if announcements %}
+<div class="stack" style="margin-bottom:18px">
+{% for a in announcements %}
+<div class="card" style="background:#fef9c3;border-left:4px solid #eab308;display:flex;justify-content:space-between;align-items:flex-start">
+  <div>📢 {{ a.body }}<span class="muted small" style="margin-left:10px">{{ a.created_at|date:"j M, g:i A" }}</span></div>
+  <form method="post" action="{% url 'announcement_delete' a.pk %}" style="margin-left:12px;flex-shrink:0">{% csrf_token %}<button class="btn ghost sm" style="color:#ef4444">✕</button></form>
+</div>
+{% endfor %}
+</div>
+{% endif %}
+
+<div class="stats">
+  <div class="card stat"><div class="n">{{ total }}</div><div class="l">Total members</div></div>
+  <div class="card stat"><div class="n">{{ active }}</div><div class="l">Active now</div></div>
+  <div class="card stat"><div class="n">{{ reports_today }}</div><div class="l">Reports today</div></div>
+  <div class="card stat"><div class="n">{{ pending }}</div><div class="l">Pending tasks</div></div>
+  <div class="card stat"><div class="n">{{ completed }}</div><div class="l">Completed today</div></div>
+  <div class="card stat"><div class="n" style="color:{% if overdue_tasks %}#dc2626{% else %}#16a34a{% endif %}">{{ overdue_tasks|length }}</div><div class="l">Overdue tasks</div></div>
+</div>
+
+{% if missing %}<div class="card" style="margin-bottom:18px;background:var(--rose)"><b>Haven't submitted today's report:</b>
+  {% for m in missing %}<a href="{% url 'member_detail' m.pk %}">{{ m.full_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</div>{% endif %}
+
+<div class="grid g2" style="align-items:start;margin-bottom:18px">
+
+  {% if overdue_tasks %}
+  <div class="card">
+    <h2>⚠️ Overdue Tasks</h2>
+    <div class="stack" style="margin-top:8px">
+    {% for t in overdue_tasks %}
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <a href="{% url 'task_detail' t.pk %}"><b>{{ t.title }}</b></a>
+        <div class="small muted">{{ t.assigned_to.full_name|default:"Unassigned" }} · due {{ t.due_date|date:"j M Y" }}</div>
+      </div>
+      <span class="badge b-bad">{{ t.due_date|timesince }} ago</span>
+    </div>
+    {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <h2>Recent Activity</h2>
+    <div class="stack" style="margin-top:8px">
+    {% for c in recent_activity %}
+    <div style="padding:6px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;gap:6px;align-items:center">
+        <b class="small">{{ c.author.full_name }}</b>
+        <span class="muted small">on <a href="{% url 'task_detail' c.work_item.pk %}">{{ c.work_item.title|truncatechars:40 }}</a></span>
+        <span class="muted small" style="margin-left:auto">{{ c.created_at|timesince }} ago</span>
+      </div>
+      <div class="small muted" style="margin-top:2px">{{ c.body|truncatechars:80 }}</div>
+    </div>
+    {% empty %}<div class="empty">No activity yet.</div>
+    {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="card scroll" style="margin-bottom:18px"><table class="tbl stack-m"><thead><tr><th>Member</th><th>Status</th><th>Login</th><th>Logout</th><th>Tasks</th><th>Completed</th><th>Blockers</th><th>Report</th></tr></thead><tbody>
+{% for r in rows %}<tr>
+ <td data-l="Member"><a href="{% url 'member_detail' r.m.pk %}"><b>{{ r.m.full_name }}</b></a></td>
+ <td data-l="Status">{% if r.wd %}<span class="badge b-{{ r.wd.state|lower }}">{{ r.wd.get_state_display }}</span>{% else %}<span class="badge">Not started</span>{% endif %}</td>
+ <td data-l="Login">{% if r.wd %}{{ r.wd.started_at|date:"g:i A" }}{% else %}—{% endif %}</td>
+ <td data-l="Logout">{% if r.wd.ended_at %}{{ r.wd.ended_at|date:"g:i A" }}{% else %}—{% endif %}</td>
+ <td data-l="Tasks">{{ r.tasks }}</td><td data-l="Completed">{{ r.done }}</td>
+ <td data-l="Blockers">{% if r.blockers %}<span class="badge b-bad">Yes</span>{% else %}—{% endif %}</td>
+ <td data-l="Report">{% if r.report %}<a href="{% url 'report_detail' r.report.pk %}">View</a>{% else %}<span class="muted">Not yet</span>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="8" class="empty">No members yet. <a href="{% url 'member_new' %}">Add your first member</a>.</td></tr>{% endfor %}</tbody></table></div>
+
+<div class="card" style="max-width:560px">
+  <h2>📢 Post Announcement</h2>
+  <form method="post" action="{% url 'announcement_add' %}" style="display:flex;gap:8px;margin-top:8px">{% csrf_token %}
+    <textarea name="body" rows="2" placeholder="e.g. Office closed Friday, Submit timesheets by 5pm…" style="flex:1"></textarea>
+    <button class="btn" type="submit">Post</button>
+  </form>
+</div>
+{% endblock %}

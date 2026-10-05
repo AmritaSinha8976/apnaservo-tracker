@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block title %}Report{% endblock %}
+{% block content %}
+<div class="head"><div><h1>{{ wd.user.full_name }} · {{ wd.date|date:"j F Y" }}</h1>
+  <p>Login {{ wd.started_at|date:"g:i A" }} · Logout {{ wd.ended_at|date:"g:i A"|default:"—" }}{% if wd.hours %} · {{ wd.hours }}{% endif %}
+  {% if r.edited_at %} · edited {{ r.edited_at|date:"g:i A" }}{% endif %}</p></div>
+  <a class="btn ghost" href="{% if user.is_admin_role %}{% url 'reports' %}{% else %}{% url 'my_reports' %}{% endif %}">← Back</a></div>
+<div class="grid g2">
+ <div class="stack">
+  <div class="card"><h2>Today's Work</h2><ul class="bul">{% for l in r.work_lines %}<li>{{ l }}</li>{% endfor %}</ul></div>
+  {% if r.pending_lines %}<div class="card"><h2>Pending Work</h2><ul class="bul">{% for l in r.pending_lines %}<li>{{ l }}</li>{% endfor %}</ul></div>{% endif %}
+  {% if r.blocker_lines %}<div class="card"><h2>Blockers</h2><ul class="bul">{% for l in r.blocker_lines %}<li>{{ l }}</li>{% endfor %}</ul></div>{% endif %}
+  {% if r.note_lines %}<div class="card"><h2>Notes</h2><ul class="bul">{% for l in r.note_lines %}<li>{{ l }}</li>{% endfor %}</ul></div>{% endif %}
+ </div>
+ <div class="stack">
+  <div class="card"><h2>Assigned tasks</h2>{% for i in r.snapshot.assigned %}<div class="item"><span>{{ i.title }}</span><span class="badge {% if i.done %}b-done{% endif %}">{{ i.status }}</span></div>{% empty %}<div class="empty">No assigned tasks.</div>{% endfor %}</div>
+  <div class="card"><h2>Self-added work</h2>{% for i in r.snapshot.self %}<div class="item"><span>{{ i.title }}</span><span class="badge {% if i.done %}b-done{% endif %}">{{ i.status }}</span></div>{% empty %}<div class="empty">None.</div>{% endfor %}</div>
+  <div class="card"><h2>Notes during the day</h2>{% for n in notes %}<div class="note"><span class="badge {% if n.kind == 'BLOCKER' %}b-bad{% else %}b-rose{% endif %}">{{ n.get_kind_display }}</span> <span class="muted small">{{ n.created_at|date:"g:i A" }}</span><div>{{ n.body }}</div></div>{% empty %}<div class="empty">No notes.</div>{% endfor %}</div>
+ </div></div>{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% block title %}{{ m.full_name }}{% endblock %}
+{% block content %}
+<div class="head"><div><h1>{{ m.full_name|default:m.username }}</h1><p>{{ m.get_role_display }}{% if m.designation %} · {{ m.designation }}{% endif %}</p></div>
+ <div class="row">
+  <form method="post" action="{% url 'member_reset_password' m.pk %}" onsubmit="return confirm('Reset password for {{ m.full_name|escapejs }}? A new temporary password will be generated.')">{% csrf_token %}<button class="btn ghost">Reset password</button></form>
+  <form method="post" action="{% url 'member_toggle_active' m.pk %}">{% csrf_token %}<button class="btn {% if m.is_active %}danger{% else %}ghost{% endif %}">{% if m.is_active %}Deactivate{% else %}Reactivate{% endif %}</button></form></div></div>
+<div class="grid g2">
+ <div class="card"><h2>Profile</h2>
+  <p><span class="muted">Email</span><br>{{ m.email }}</p><p><span class="muted">Phone</span><br>{{ m.phone|default:"—" }}</p>
+  <p><span class="muted">Username</span><br>{{ m.username }}</p><p><span class="muted">Joined</span><br>{{ m.date_joined|date:"j F Y" }}</p>
+  <p><span class="muted">Account</span><br>{% if m.is_active %}<span class="badge b-done">Active</span>{% else %}<span class="badge">Deactivated</span>{% endif %}
+   {% if m.must_change_password %}<span class="badge b-rose">Hasn't changed initial password</span>{% endif %}</p>
+  <p><span class="muted">Last login</span><br>{{ last_login.timestamp|date:"j M Y, g:i A"|default:"Never" }}</p></div>
+ <div class="card"><h2>Daily reports</h2>{% for r in reports %}<div class="item"><span>{{ r.workday.date|date:"D, j M Y" }}</span><a href="{% url 'report_detail' r.pk %}">View Report</a></div>
+  {% empty %}<div class="empty">No reports yet.</div>{% endfor %}</div></div>
+<div class="card scroll" style="margin-top:18px"><h2>Task &amp; work history</h2><table class="tbl stack-m"><thead><tr><th>Title</th><th>Type</th><th>Priority</th><th>Status</th><th>Added</th></tr></thead><tbody>
+{% for i in items %}<tr><td data-l="Title">{{ i.title }}</td><td data-l="Type">{{ i.get_source_display }}</td><td data-l="Priority">{{ i.get_priority_display }}</td>
+<td data-l="Status"><span class="badge b-{{ i.status|lower }}">{{ i.get_status_display }}</span></td><td data-l="Added">{{ i.created_at|date:"j M" }}</td></tr>
+{% empty %}<tr><td colspan="5" class="empty">No tasks or work yet.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}

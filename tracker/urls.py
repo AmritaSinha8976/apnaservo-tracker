@@ -1,0 +1,38 @@
+from django.urls import path
+from . import views as v
+
+urlpatterns = [
+    path("", v.home, name="home"),
+    path("my/work/add/", v.work_add, name="work_add"),
+    path("my/work/<int:pk>/delete/", v.work_delete, name="work_delete"),
+    path("my/notes/add/", v.note_add, name="note_add"),
+    path("my/end-day/", v.end_day, name="end_day"),
+    path("my/reports/", v.my_reports, name="my_reports"),
+    path("my/history/", v.my_task_history, name="my_task_history"),
+    path("my/summary/", v.profile_summary, name="profile_summary"),
+    path("notifications/", v.notifications_view, name="notifications"),
+    path("notifications/<int:pk>/read/", v.notification_mark_read, name="notification_mark_read"),
+    path("attendance/", v.attendance_calendar, name="attendance_calendar"),
+    path("attendance/notes/add/", v.calendar_note_add, name="calendar_note_add"),
+    path("attendance/notes/<int:pk>/delete/", v.calendar_note_delete, name="calendar_note_delete"),
+    path("items/<int:pk>/status/", v.item_status, name="item_status"),
+    path("items/<int:pk>/", v.task_detail, name="task_detail"),
+    path("reports/<int:pk>/", v.report_detail, name="report_detail"),
+    path("search/", v.search, name="search"),
+
+    path("admin-panel/", v.admin_dashboard, name="admin_dashboard"),
+    path("admin-panel/members/", v.members, name="members"),
+    path("admin-panel/members/new/", v.member_new, name="member_new"),
+    path("admin-panel/members/<int:pk>/", v.member_detail, name="member_detail"),
+    path("admin-panel/members/<int:pk>/reset-password/", v.member_reset_password, name="member_reset_password"),
+    path("admin-panel/members/<int:pk>/toggle-active/", v.member_toggle_active, name="member_toggle_active"),
+    path("admin-panel/tasks/", v.tasks, name="tasks"),
+    path("admin-panel/tasks/<int:pk>/assign/", v.task_assign, name="task_assign"),
+    path("admin-panel/tasks/<int:pk>/edit/", v.task_edit, name="task_edit"),
+    path("admin-panel/tasks/<int:pk>/delete/", v.task_delete, name="task_delete"),
+    path("admin-panel/reports/", v.reports, name="reports"),
+    path("admin-panel/announcements/add/", v.announcement_add, name="announcement_add"),
+    path("admin-panel/announcements/<int:pk>/delete/", v.announcement_delete, name="announcement_delete"),
+    path("admin-panel/export/attendance/", v.export_attendance_csv, name="export_attendance_csv"),
+    path("admin-panel/export/reports/", v.export_reports_csv, name="export_reports_csv"),
+]

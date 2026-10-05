@@ -1,0 +1,68 @@
+{% extends "base.html" %}{% block title %}Today{% endblock %}
+{% block content %}
+<div class="head"><div><h1>Hello, {{ user.full_name|default:user.username|truncatechars:30 }} 👋</h1><p>{{ today|date:"l, j F Y" }}</p></div>
+  {% if wd.state == 'ENDED' %}<a class="btn ghost" href="{% url 'end_day' %}">Edit today's report</a>
+  {% else %}<a class="btn" href="{% url 'end_day' %}">End Day</a>{% endif %}</div>
+
+<div class="card" style="margin-bottom:18px;display:flex;gap:18px;flex-wrap:wrap;align-items:center;background:var(--surface2)">
+  <span>📋 <b>{{ total_tasks }}</b> task{{ total_tasks|pluralize }} today</span>
+  {% if overdue_count %}<span style="color:#dc2626">⚠️ <b>{{ overdue_count }}</b> overdue</span>{% endif %}
+  {% if report_pending %}<span style="color:#d97706">📝 Daily report pending</span>{% else %}<span style="color:#16a34a">✅ Report submitted</span>{% endif %}
+</div>
+
+{% if announcements %}
+<div class="stack" style="margin-bottom:18px">
+{% for a in announcements %}
+<div class="card" style="background:#fef9c3;border-left:4px solid #eab308">📢 {{ a.body }}<span class="muted small" style="margin-left:10px">{{ a.created_at|date:"j M" }}</span></div>
+{% endfor %}
+</div>
+{% endif %}
+
+<div class="grid g3" style="margin-bottom:18px">
+  <div class="card hero"><div class="muted small">Current time</div><div class="clock" id="clock">--:--</div></div>
+  <div class="card"><div class="muted small">Day started</div><div class="clock">{{ wd.started_at|date:"g:i A" }}</div></div>
+  <div class="card"><div class="muted small">Status</div>
+    <div style="margin-top:8px"><span class="badge b-{{ wd.state|lower }}">{{ wd.get_state_display }}</span>
+    {% if report %}<span class="badge b-done">Report saved</span>{% endif %}</div>
+    <div class="muted small" style="margin-top:8px">{% if wd.state == 'ENDED' %}Ended {{ wd.ended_at|date:"g:i A" }}{% else %}Don't forget your end-of-day report.{% endif %}</div></div>
+</div>
+
+<div class="grid g2">
+ <div class="stack">
+  <div class="card"><h2>My Tasks <span class="muted small">· from admin</span></h2>
+   {% for i in assigned %}<div class="item {% if i.status == 'COMPLETED' %}done{% endif %}" style="{% if i.pk in due_today_ids %}border-left:3px solid #f59e0b{% endif %}"><div><div class="t"><a href="{% url 'task_detail' i.pk %}" style="color:inherit">{{ i.title }}</a>{% if i.pk in due_today_ids %} <span class="badge" style="background:#fef3c7;color:#92400e">Due Today</span>{% endif %}</div>
+     <div class="small muted"><span class="badge b-rose">{{ i.get_priority_display }}</span>{% if i.due_date %} · due {{ i.due_date|date:"j M" }}{% endif %} · <a href="{% url 'task_detail' i.pk %}" class="muted">{{ i.comments.count }} comment{{ i.comments.count|pluralize }}</a></div>
+     {% if i.description %}<div class="small muted">{{ i.description }}</div>{% endif %}</div>{% include "_status.html" with item=i %}</div>
+   {% empty %}<div class="empty">No tasks assigned to you. You can still add your own work below.</div>{% endfor %}</div>
+
+  <div class="card"><h2>My Work <span class="muted small">· added by me</span></h2>
+   <form method="post" action="{% url 'work_add' %}" style="margin-bottom:12px">{% csrf_token %}
+     <div class="field">{{ work_form.title }}</div>
+     <div class="field">{{ work_form.description }}</div>
+     <div class="field"><label class="small muted">Deadline (optional)</label>{{ work_form.due_date }}</div>
+     <button class="btn" type="submit">+ Add to Plan</button>
+   </form>
+   {% for i in mine %}<div class="item {% if i.status == 'COMPLETED' %}done{% endif %}"><div><div class="t">{{ i.title }}</div>
+     {% if i.description %}<div class="small muted">{{ i.description }}</div>{% endif %}
+     {% if i.due_date %}<div class="small muted">📅 Due {{ i.due_date|date:"j M Y" }}</div>{% endif %}
+   </div>
+   <div style="display:flex;gap:6px;align-items:center">{% include "_status.html" with item=i %}
+   <form method="post" action="{% url 'work_delete' i.pk %}">{% csrf_token %}<button class="btn ghost sm" type="submit" style="color:#ef4444" onclick="return confirm('Remove this item?')">✕</button></form>
+   </div></div>
+   {% empty %}<div class="empty">Add what you plan to work on today.</div>{% endfor %}</div>
+ </div>
+
+ <div class="stack">
+  <div class="card"><h2>Notes</h2>
+   <form method="post" action="{% url 'note_add' %}">{% csrf_token %}
+     <div class="field">{{ note_form.kind }}</div><div class="field">{{ note_form.body }}</div>
+     <button class="btn" type="submit">Add Note</button></form>
+   <div style="margin-top:14px">{% for n in notes %}<div class="note"><span class="badge {% if n.kind == 'BLOCKER' %}b-bad{% else %}b-rose{% endif %}">{{ n.get_kind_display }}</span>
+     <span class="muted small"> {{ n.created_at|date:"g:i A" }}</span><div style="white-space:pre-wrap">{{ n.body }}</div></div>
+   {% empty %}<div class="empty">No notes yet today.</div>{% endfor %}</div></div>
+
+  <div class="card"><h2>Today's Report</h2>
+   {% if report %}<p class="muted">Your report is saved. You can still edit it today.</p><a class="btn ghost" href="{% url 'end_day' %}">Edit report</a>
+   {% else %}<p class="muted">At the end of the day, list what you worked on and press <b>End Day</b>.</p><a class="btn" href="{% url 'end_day' %}">Write Today's Report</a>{% endif %}</div>
+ </div>
+</div>{% endblock %}

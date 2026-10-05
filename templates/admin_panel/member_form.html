@@ -1,0 +1,4 @@
+{% extends "base.html" %}{% block title %}Add Member{% endblock %}
+{% block content %}<div class="head"><div><h1>Add Member</h1><p>Create their login. They'll be asked to set a new password the first time they sign in.</p></div></div>
+<div class="card" style="max-width:640px"><form method="post">{% csrf_token %}{% include "_form.html" %}
+<div class="row"><button class="btn" type="submit">Create Member</button><a class="btn ghost" href="{% url 'members' %}">Cancel</a></div></form></div>{% endblock %}

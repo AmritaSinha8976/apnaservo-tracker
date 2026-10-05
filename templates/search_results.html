@@ -1,0 +1,39 @@
+{% extends "base.html" %}{% block title %}Search{% endblock %}
+{% block content %}
+<div class="head"><div><h1>Search</h1></div></div>
+<form method="get" style="display:flex;gap:8px;margin-bottom:22px">
+  <input name="q" value="{{ q }}" placeholder="Search tasks and reports…" style="max-width:420px">
+  <button class="btn" type="submit">Search</button>
+</form>
+
+{% if q %}
+<div class="stack">
+  <div class="card">
+    <h2>Tasks <span class="muted small">{{ task_results|length }} result{{ task_results|length|pluralize }}</span></h2>
+    {% for i in task_results %}
+    <div style="padding:8px 0;border-bottom:1px solid var(--border)">
+      <a href="{% url 'task_detail' i.pk %}"><b>{{ i.title }}</b></a>
+      <span class="badge b-rose" style="margin-left:6px">{{ i.get_status_display }}</span>
+      {% if i.assigned_to %}<span class="muted small"> · {{ i.assigned_to.full_name }}</span>{% endif %}
+      {% if i.description %}<div class="small muted">{{ i.description|truncatechars:100 }}</div>{% endif %}
+    </div>
+    {% empty %}<div class="empty">No tasks found.</div>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <h2>Daily Reports <span class="muted small">{{ report_results|length }} result{{ report_results|length|pluralize }}</span></h2>
+    {% for r in report_results %}
+    <div style="padding:8px 0;border-bottom:1px solid var(--border)">
+      <a href="{% url 'report_detail' r.pk %}"><b>{{ r.workday.date|date:"j M Y" }}</b></a>
+      <span class="muted small"> · {{ r.workday.user.full_name }}</span>
+      <div class="small muted">{{ r.todays_work|truncatechars:100 }}</div>
+    </div>
+    {% empty %}<div class="empty">No reports found.</div>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+<div class="card empty">Enter a keyword above to search tasks and reports.</div>
+{% endif %}
+{% endblock %}

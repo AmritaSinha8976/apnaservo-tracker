@@ -1,0 +1,89 @@
+{% extends "base.html" %}{% block title %}Attendance{% endblock %}
+{% block content %}
+<div class="head">
+  <div><h1>Attendance Calendar</h1><p>{{ month_name }}</p></div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <a class="btn ghost" href="?year={{ prev_y }}&month={{ prev_m }}{% if request.GET.member %}&member={{ request.GET.member }}{% endif %}">‹ Prev</a>
+    <a class="btn ghost" href="?year={{ next_y }}&month={{ next_m }}{% if request.GET.member %}&member={{ request.GET.member }}{% endif %}">Next ›</a>
+    {% if user.is_admin_role %}<a class="btn ghost" href="{% url 'export_attendance_csv' %}?year={{ year }}&month={{ month }}">⬇ Export CSV</a>{% endif %}
+  </div>
+</div>
+
+{% if all_members %}
+<div class="card" style="margin-bottom:16px">
+  <form method="get" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <input type="hidden" name="year"  value="{{ year }}">
+    <input type="hidden" name="month" value="{{ month }}">
+    <select name="member" onchange="this.form.submit()" style="min-width:180px">
+      <option value="">— Select member —</option>
+      {% for m in all_members %}<option value="{{ m.pk }}" {% if target_user and target_user.pk == m.pk %}selected{% endif %}>{{ m.full_name }}</option>{% endfor %}
+    </select>
+  </form>
+</div>
+{% endif %}
+
+{% if target_user %}
+<div class="stats" style="margin-bottom:16px">
+  <div class="card stat"><div class="n" style="color:var(--green)">{{ present_count }}</div><div class="l">Present</div></div>
+  <div class="card stat"><div class="n" style="color:var(--rose)">{{ absent_count }}</div><div class="l">Absent</div></div>
+  <div class="card stat"><div class="n" style="color:var(--accent)">{{ holiday_count }}</div><div class="l">Holidays</div></div>
+</div>
+
+<div class="card">
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center">
+    {% for day in weekdays %}
+    <div style="font-weight:600;font-size:.75rem;padding:4px;color:{% if day == 'Sun' %}#9ca3af{% else %}var(--muted){% endif %}">{{ day }}</div>
+    {% endfor %}
+
+    {% for blank in offset_blanks %}<div></div>{% endfor %}
+
+    {% for d in calendar_days %}
+    <div style="border-radius:8px;padding:6px 2px;font-size:.85rem;
+      {% if d.is_sunday %}background:#f3f4f6;color:#9ca3af
+      {% elif d.status == 'PRESENT' %}background:#d1fae5;color:#065f46
+      {% elif d.status == 'ABSENT' %}background:#fee2e2;color:#991b1b
+      {% elif d.status == 'HOLIDAY' %}background:#fef3c7;color:#92400e
+      {% else %}background:#f9fafb;color:#6b7280{% endif %}
+      {% if d.is_future and not d.is_sunday %}opacity:.45{% endif %}">
+      <div style="font-weight:600">{{ d.date.day }}</div>
+      {% if d.is_sunday %}<div style="font-size:.65rem;margin-top:2px">Off</div>
+      {% elif d.holiday_name %}<div style="font-size:.65rem;margin-top:2px">{{ d.holiday_name }}</div>
+      {% elif d.status == 'PRESENT' %}<div style="font-size:.65rem;margin-top:2px">Present</div>
+      {% elif d.status == 'ABSENT' %}<div style="font-size:.65rem;margin-top:2px">Absent</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  <div style="display:flex;gap:14px;margin-top:14px;flex-wrap:wrap;font-size:.8rem">
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:#d1fae5;display:inline-block"></span>Present</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:#fee2e2;display:inline-block"></span>Absent</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:#fef3c7;display:inline-block"></span>Holiday</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;border-radius:3px;background:#f3f4f6;display:inline-block"></span>Sunday Off</span>
+  </div>
+</div>
+{% else %}
+<div class="card"><p class="muted">Select a member to view their attendance.</p></div>
+{% endif %}
+
+<div class="card" style="margin-top:18px">
+  <h2>Notes for {{ month_name }}</h2>
+  {% for n in cal_notes %}
+  <div class="note" style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div style="white-space:pre-wrap">{{ n.body }}</div>
+    {% if user.is_admin_role %}
+    <form method="post" action="{% url 'calendar_note_delete' n.pk %}" style="margin-left:12px;flex-shrink:0">{% csrf_token %}
+      <button class="btn ghost sm" type="submit" style="color:var(--rose)">✕</button>
+    </form>
+    {% endif %}
+  </div>
+  {% empty %}<p class="muted">No notes for this month.</p>{% endfor %}
+
+  {% if user.is_admin_role %}
+  <form method="post" action="{% url 'calendar_note_add' %}" style="margin-top:12px">{% csrf_token %}
+    <input type="hidden" name="year"  value="{{ year }}">
+    <input type="hidden" name="month" value="{{ month }}">
+    <div class="field"><textarea name="body" rows="2" placeholder="Add a note for this month…" style="width:100%"></textarea></div>
+    <button class="btn" type="submit">Add Note</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

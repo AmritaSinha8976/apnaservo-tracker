@@ -1,0 +1,4 @@
+<div class="card"><h1 style="font-size:1.3rem">{% if forced %}Set your new password{% else %}Change password{% endif %}</h1>
+  <p class="muted">{% if forced %}For your security, please replace the temporary password you were given before continuing.{% else %}Choose a strong password you don't use elsewhere.{% endif %}</p>
+  <form method="post">{% csrf_token %}{% include "_form.html" %}<button class="btn block" type="submit">Save password</button></form>
+  {% if forced %}<form method="post" action="{% url 'logout' %}" style="margin-top:12px">{% csrf_token %}<button class="btn ghost block sm" type="submit">Log out</button></form>{% endif %}</div>

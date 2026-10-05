@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% block title %}Task History{% endblock %}
+{% block content %}
+<div class="head">
+  <div><h1>Task History</h1><p>{{ month_name }}</p></div>
+  <div style="display:flex;gap:8px">
+    <a class="btn ghost" href="?year={{ prev_y }}&month={{ prev_m }}">‹ Prev</a>
+    <a class="btn ghost" href="?year={{ next_y }}&month={{ next_m }}">Next ›</a>
+  </div>
+</div>
+<div class="card scroll">
+  <table class="tbl stack-m"><thead><tr><th>Task</th><th>Type</th><th>Priority</th><th>Completed</th></tr></thead><tbody>
+  {% for i in items %}
+  <tr>
+    <td data-l="Task"><a href="{% url 'task_detail' i.pk %}"><b>{{ i.title }}</b></a>
+      {% if i.description %}<div class="small muted">{{ i.description|truncatechars:60 }}</div>{% endif %}</td>
+    <td data-l="Type"><span class="badge b-rose">{{ i.get_source_display }}</span></td>
+    <td data-l="Priority">{{ i.get_priority_display }}</td>
+    <td data-l="Completed">{{ i.completed_at|date:"j M Y, g:i A"|default:"—" }}</td>
+  </tr>
+  {% empty %}<tr><td colspan="4" class="empty">No completed tasks in {{ month_name }}.</td></tr>
+  {% endfor %}
+  </tbody></table>
+</div>
+{% endblock %}

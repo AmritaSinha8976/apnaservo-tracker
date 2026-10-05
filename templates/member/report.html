@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% block title %}Today's Report{% endblock %}
+{% block content %}
+<div class="head"><div><h1>Today's Report</h1><p>Started {{ wd.started_at|date:"g:i A" }} · {{ wd.date|date:"l, j F Y" }}</p></div></div>
+<div class="grid g2">
+ <div class="card"><form method="post" id="reportForm">{% csrf_token %}{% include "_form.html" %}
+   <div class="row">
+     <button type="button" class="btn" id="endBtn">{% if report %}Save &amp; Log out{% else %}End Day{% endif %}</button>
+     <a class="btn ghost" href="{% url 'home' %}">Back</a></div></form></div>
+ <div class="stack">
+  <div class="card"><h2>Assigned tasks</h2>{% for i in snap.assigned %}<div class="item"><span>{{ i.title }}</span><span class="badge {% if i.done %}b-done{% endif %}">{{ i.status }}</span></div>
+    {% empty %}<div class="empty">None today.</div>{% endfor %}</div>
+  <div class="card"><h2>My work</h2>{% for i in snap.self %}<div class="item"><span>{{ i.title }}</span><span class="badge {% if i.done %}b-done{% endif %}">{{ i.status }}</span></div>
+    {% empty %}<div class="empty">Nothing added.</div>{% endfor %}</div>
+  <div class="card"><h2>Today's notes</h2>{% for n in notes %}<div class="note"><b class="small">{{ n.get_kind_display }}</b><div>{{ n.body }}</div></div>{% empty %}<div class="empty">No notes.</div>{% endfor %}</div>
+ </div></div>
+<dialog id="confirmEnd"><h2>Are you sure you want to end your day?</h2>
+  <p class="muted">Your report will be saved and you'll be logged out.</p>
+  <div class="row"><button class="btn" type="submit" form="reportForm">Yes, end my day</button><button class="btn ghost" type="button" id="cancelEnd">Keep working</button></div></dialog>
+{% endblock %}

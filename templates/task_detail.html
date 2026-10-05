@@ -1,0 +1,57 @@
+{% extends "base.html" %}{% block title %}{{ item.title }}{% endblock %}
+{% block content %}
+<div class="head">
+  <div>
+    <h1>{{ item.title }}</h1>
+    <p>
+      <span class="badge b-rose">{{ item.get_priority_display }}</span>
+      <span class="badge b-{{ item.status|lower }}">{{ item.get_status_display }}</span>
+      {% if item.due_date %}<span class="muted small"> · Due {{ item.due_date|date:"j M Y" }}</span>{% endif %}
+      {% if item.assigned_to %}<span class="muted small"> · {{ item.assigned_to.full_name }}</span>{% endif %}
+    </p>
+  </div>
+  <a class="btn ghost" href="javascript:history.back()">← Back</a>
+</div>
+
+{% if item.description %}
+<div class="card" style="margin-bottom:16px"><p>{{ item.description }}</p></div>
+{% endif %}
+
+<div class="grid g2" style="align-items:start">
+  <div class="card">
+    <h2>Activity Log</h2>
+    <div class="stack" style="margin-top:8px">
+      {% for c in comments %}
+      <div style="border-left:3px solid var(--border);padding-left:12px">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:2px">
+          <b style="font-size:.9rem">{{ c.author.full_name }}</b>
+          <span class="muted small">{{ c.created_at|date:"j M Y, g:i A" }}</span>
+        </div>
+        <div style="white-space:pre-wrap">{{ c.body }}</div>
+      </div>
+      {% empty %}
+      <div class="empty">No comments yet. Add the first update below.</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Add Update</h2>
+    <form method="post">{% csrf_token %}
+      <div class="field">{{ form.body }}</div>
+      <button class="btn block" type="submit">Post Comment</button>
+    </form>
+    <div style="margin-top:16px">
+      <form method="post" action="{% url 'item_status' item.pk %}">{% csrf_token %}
+        <input type="hidden" name="next" value="{% url 'task_detail' item.pk %}">
+        <label class="small muted">Update status</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+          {% for val, label in item.STATUSES %}
+          <button class="btn {% if item.status == val %}{% else %}ghost{% endif %} sm" name="status" value="{{ val }}" type="submit">{{ label }}</button>
+          {% endfor %}
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

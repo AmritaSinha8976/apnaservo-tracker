@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block title %}Members{% endblock %}
+{% block content %}<div class="head"><div><h1>Members</h1></div><a class="btn" href="{% url 'member_new' %}">+ Add Member</a></div>
+<form class="filters" method="get"><div style="flex:1"><label>Search</label><input name="q" value="{{ q }}" placeholder="Name, username or email"></div><button class="btn ghost">Search</button></form>
+<div class="card scroll"><table class="tbl stack-m"><thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Role</th><th>Account</th></tr></thead><tbody>
+{% for m in members %}<tr><td data-l="Name"><a href="{% url 'member_detail' m.pk %}"><b>{{ m.full_name|default:m.username }}</b></a></td><td data-l="Username">{{ m.username }}</td><td data-l="Email">{{ m.email }}</td>
+<td data-l="Role">{{ m.get_role_display }}</td><td data-l="Account">{% if m.is_active %}<span class="badge b-done">Active</span>{% else %}<span class="badge">Deactivated</span>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="5" class="empty">No members found.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}

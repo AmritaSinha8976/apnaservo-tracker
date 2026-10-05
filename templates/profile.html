@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block title %}Profile{% endblock %}
+{% block content %}<div class="head"><div><h1>My profile</h1></div></div>
+<div class="grid g2"><div class="card"><h2>Details</h2>
+  <p><span class="muted">Name</span><br><b>{{ user.full_name }}</b></p><p><span class="muted">Email</span><br>{{ user.email }}</p>
+  <p><span class="muted">Username</span><br>{{ user.username }}</p><p><span class="muted">Role</span><br>{{ user.get_role_display }}{% if user.designation %} · {{ user.designation }}{% endif %}</p>
+  <p><span class="muted">Joined</span><br>{{ user.date_joined|date:"j F Y" }}</p>
+  <p class="muted small">To change your name, email or role, ask an admin.</p></div>
+<div class="stack"><div class="card"><h2>Contact</h2><form method="post">{% csrf_token %}{% include "_form.html" %}<button class="btn" type="submit">Save update</button></form></div>
+<div class="card"><h2>Password</h2><a class="btn ghost" href="{% url 'password_change' %}">Change password</a></div></div></div>{% endblock %}

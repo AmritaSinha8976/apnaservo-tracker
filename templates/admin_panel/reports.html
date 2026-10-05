@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block title %}Daily Reports{% endblock %}
+{% block content %}<div class="head"><div><h1>Daily Reports</h1><p>Pick a date to see everyone's work, or leave it empty for full history.</p></div>
+<div style="display:flex;gap:8px">
+  <a class="btn ghost" href="{% url 'export_reports_csv' %}?date={{ date|date:'Y-m-d' }}&member={{ member }}">⬇ Export CSV</a>
+</div></div>
+<form class="filters" method="get">
+  <div><label>Date</label><input type="date" name="date" value="{{ date|date:'Y-m-d' }}"></div>
+  <div><label>Member</label><select name="member"><option value="">All members</option>{% for m in all_members %}<option value="{{ m.pk }}" {% if member == m.pk|stringformat:'s' %}selected{% endif %}>{{ m.full_name }}</option>{% endfor %}</select></div>
+  <button class="btn">Apply</button><a class="btn ghost" href="{% url 'reports' %}">Clear</a></form>
+{% if missing %}<div class="card" style="margin-bottom:16px;background:var(--rose)"><b>No report on {{ date|date:"j M Y" }}:</b> {% for m in missing %}<a href="{% url 'member_detail' m.pk %}">{{ m.full_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</div>{% endif %}
+<div class="card scroll"><table class="tbl stack-m"><thead><tr><th>Date</th><th>Member</th><th>Login</th><th>Logout</th><th>Summary</th><th>Flags</th><th></th></tr></thead><tbody>
+{% for r in reports %}<tr><td data-l="Date">{{ r.workday.date|date:"j M Y" }}</td><td data-l="Member"><b>{{ r.workday.user.full_name }}</b></td>
+<td data-l="Login">{{ r.workday.started_at|date:"g:i A" }}</td><td data-l="Logout">{{ r.workday.ended_at|date:"g:i A"|default:"—" }}</td>
+<td data-l="Summary" class="small">{{ r.work_lines|first|truncatechars:70 }}{% if r.work_lines|length > 1 %} <span class="muted">+{{ r.work_lines|length|add:"-1" }} more</span>{% endif %}</td>
+<td data-l="Flags">{% if r.blocker_lines %}<span class="badge b-bad">Blockers</span>{% endif %}{% if r.pending_lines %} <span class="badge">Pending</span>{% endif %}</td>
+<td class="right"><a href="{% url 'report_detail' r.pk %}">View Report</a></td></tr>
+{% empty %}<tr><td colspan="7" class="empty">No reports found.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% block title %}Sign in{% endblock %}
+{% block auth %}<div class="card">
+  <h1>Welcome back</h1><p class="muted" style="margin:0 0 18px">Sign in to the ApnaServo team workspace.</p>
+  <form method="post">{% csrf_token %}<input type="hidden" name="next" value="{{ next }}">
+    {% if form.errors %}<div class="msg error">Incorrect username or password.</div>{% endif %}
+    <div class="field"><label for="id_username">Username</label><input id="id_username" name="username" autofocus autocomplete="username" required></div>
+    <div class="field"><label for="id_password">Password</label><input id="id_password" type="password" name="password" autocomplete="current-password" required></div>
+    <button class="btn block" type="submit">Sign in</button>
+  </form></div>
+  <p class="muted small" style="text-align:center;margin-top:16px">Internal tool · Guwahati team. Forgot your password? Ask your admin.</p>
+{% endblock %}

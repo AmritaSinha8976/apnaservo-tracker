@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% block title %}My Summary{% endblock %}
+{% block content %}
+<div class="head">
+  <div><h1>My Summary</h1><p>{{ month_name }}</p></div>
+  <div style="display:flex;gap:8px">
+    <a class="btn ghost" href="?year={{ prev_y }}&month={{ prev_m }}">‹ Prev</a>
+    <a class="btn ghost" href="?year={{ next_y }}&month={{ next_m }}">Next ›</a>
+  </div>
+</div>
+<div class="stats">
+  <div class="card stat"><div class="n" style="color:#16a34a">{{ present }}</div><div class="l">Days Present</div></div>
+  <div class="card stat"><div class="n">{{ working_days }}</div><div class="l">Working Days</div></div>
+  <div class="card stat"><div class="n" style="color:{% if attendance_pct >= 90 %}#16a34a{% elif attendance_pct >= 75 %}#d97706{% else %}#dc2626{% endif %}">{{ attendance_pct }}%</div><div class="l">Attendance</div></div>
+  <div class="card stat"><div class="n" style="color:#2563eb">{{ completed_tasks }}</div><div class="l">Tasks Completed</div></div>
+</div>
+<div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+  <a class="btn ghost" href="{% url 'my_task_history' %}?year={{ year }}&month={{ month }}">View Completed Tasks →</a>
+  <a class="btn ghost" href="{% url 'attendance_calendar' %}?year={{ year }}&month={{ month }}">View Attendance →</a>
+</div>
+{% endblock %}

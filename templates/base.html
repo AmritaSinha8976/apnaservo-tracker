@@ -1,0 +1,61 @@
+{% load static %}<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}ApnaServo Team{% endblock %} · ApnaServo</title>
+<link rel="icon" href="{% static 'img/favicon.png' %}">
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head><body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V21H3z"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m9 11 3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h8"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+<symbol id="i-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></symbol>
+</defs></svg>
+{% if user.is_authenticated and not user.must_change_password %}
+<div class="app">
+<aside class="side">
+  <a class="logo" href="{% url 'home' %}"><img src="{% static 'img/logo.png' %}" alt="ApnaServo"></a>
+  <div class="tag">{% if user.is_admin_role %}Admin{% else %}My workspace{% endif %}</div>
+  {% with p=request.path %}
+  <nav class="nav">
+  {% if user.is_admin_role %}
+    <a href="{% url 'admin_dashboard' %}" class="{% if p == '/admin-panel/' %}on{% endif %}"><svg class="i"><use href="#i-home"/></svg>Dashboard</a>
+    <a href="{% url 'members' %}" class="{% if '/admin-panel/members' in p %}on{% endif %}"><svg class="i"><use href="#i-users"/></svg>Members</a>
+    <a href="{% url 'tasks' %}" class="{% if '/admin-panel/tasks' in p %}on{% endif %}"><svg class="i"><use href="#i-check"/></svg>Tasks</a>
+    <a href="{% url 'reports' %}" class="{% if '/admin-panel/reports' in p %}on{% endif %}"><svg class="i"><use href="#i-file"/></svg>Daily Reports</a>
+    <a href="{% url 'attendance_calendar' %}" class="{% if '/attendance/' in p %}on{% endif %}"><svg class="i"><use href="#i-check"/></svg>Attendance</a>
+    <a href="{% url 'search' %}" class="{% if p == '/search/' %}on{% endif %}"><svg class="i"><use href="#i-search"/></svg>Search</a>
+  {% else %}
+    <a href="{% url 'home' %}" class="{% if p == '/' %}on{% endif %}"><svg class="i"><use href="#i-home"/></svg>Today</a>
+    <a href="{% url 'end_day' %}" class="{% if p == '/my/end-day/' %}on{% endif %}"><svg class="i"><use href="#i-check"/></svg>Today's Report</a>
+    <a href="{% url 'my_reports' %}" class="{% if p == '/my/reports/' %}on{% endif %}"><svg class="i"><use href="#i-file"/></svg>Past Reports</a>
+    <a href="{% url 'my_task_history' %}" class="{% if p == '/my/history/' %}on{% endif %}"><svg class="i"><use href="#i-check"/></svg>Task History</a>
+    <a href="{% url 'profile_summary' %}" class="{% if p == '/my/summary/' %}on{% endif %}"><svg class="i"><use href="#i-user"/></svg>My Summary</a>
+    <a href="{% url 'attendance_calendar' %}" class="{% if '/attendance/' in p %}on{% endif %}"><svg class="i"><use href="#i-check"/></svg>Attendance</a>
+    <a href="{% url 'notifications' %}" class="{% if p == '/notifications/' %}on{% endif %}" style="position:relative"><svg class="i"><use href="#i-bell"/></svg>Notifications{% if unread_count %}<span style="position:absolute;top:6px;right:8px;background:#ef4444;color:#fff;border-radius:999px;font-size:.65rem;font-weight:700;padding:1px 5px;line-height:1.4">{{ unread_count }}</span>{% endif %}</a>
+    <a href="{% url 'search' %}" class="{% if p == '/search/' %}on{% endif %}"><svg class="i"><use href="#i-search"/></svg>Search</a>
+  {% endif %}
+    <a href="{% url 'profile' %}" class="{% if p == '/profile/' %}on{% endif %}"><svg class="i"><use href="#i-user"/></svg>Profile</a>
+  </nav>
+  {% endwith %}
+  <div class="me"><b>{{ user.full_name|default:user.username }}</b><span class="muted small">{{ user.get_role_display }}</span>
+    <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+      <button class="btn ghost sm block" type="submit"><svg class="i"><use href="#i-out"/></svg>{% if user.is_admin_role %}Log out{% else %}End Day / Logout{% endif %}</button></form></div>
+</aside>
+<main class="main">
+{% if messages %}<div class="msgs">{% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}</div>{% endif %}
+{% block content %}{% endblock %}
+</main></div>
+{% else %}
+<div class="auth"><div class="box">
+  <img class="logo" src="{% static 'img/logo.png' %}" alt="ApnaServo">
+  {% if messages %}<div class="msgs">{% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}</div>{% endif %}
+  {% block auth %}{% endblock %}
+</div></div>
+{% endif %}
+<script src="{% static 'js/app.js' %}"></script>
+</body></html>
