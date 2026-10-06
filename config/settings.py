@@ -6,11 +6,25 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-change-me-in-production")
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "apnaservo-tracker.onrender.com",
+    "tracker.apnaservo.com",
+    *(
+        host.strip()
+        for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
+        if host.strip()
+    ),
+]
 CSRF_TRUSTED_ORIGINS = [
-    origin.strip()
-    for origin in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
-    if origin.strip()
+    "https://apnaservo-tracker.onrender.com",
+    "https://tracker.apnaservo.com",
+    *(
+        origin.strip()
+        for origin in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
+        if origin.strip()
+    ),
 ]
 
 INSTALLED_APPS = [
